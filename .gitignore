@@ -1,98 +1,118 @@
-#ompiled source #
-###################
-*.com
-*.class
-*.dll
-*.exe
-*.o
-*.so
-*.o.d
-
-# Packages #
-############
-# it's better to unpack these files and commit the raw source
-# git has its own built in compression methods
-*.7z
-*.dmg
-*.gz
-*.iso
-*.rar
-*.tar
-*.zip
-
-# Logs and databases #
-######################
-*.log
-*.sql
-*.sqlite
-
-# OS generated files #
-######################
+ OSX - https://github.com/github/gitignore/blob/master/Global/OSX.gitignore
 .DS_Store
-.DS_Store?
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
 ._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
 .Spotlight-V100
+.TemporaryItems
 .Trashes
-ehthumbs.db
+.VolumeIcon.icns
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+
+# Windows - https://github.com/github/gitignore/blob/master/Global/Windows.gitignore
+# Windows image file caches
 Thumbs.db
+ehthumbs.db
 
-*.swp
-*~.nib
+# Folder config file
+Desktop.ini
 
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
 
-# Personal files in the iOS project #
-######################-
-*.mode1v3
-*.mode2v3
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
 
-xcuserdata
-
-*.mode*
-*.pbxuser
-*.perspective*
-
-!project.pbxproj
-
-#.LSOverride#
-
-# Generated files in the Android project #
-proj.android/libs/armeabi/*
-proj.android/libs/armeabi-v7a/*
-proj.android/libs/x86/*
-proj.android/obj/*
-
-proj.android/build/
-proj.android/gen/*
-proj.android/bin/*
-proj.android/assets/*
-
-proj.android/.gradle/*
-proj.android/.idea/*
-proj.android/*.iml
-proj.android/local.properties
-
-proj.android/libraries/*/build/
-proj.android/libraries/*/gen/*
-proj.android/libraries/*/bin/*
-proj.android/libraries/*/.idea/*
-proj.android/libraries/*/*.iml
-proj.android/libraries/*/local.properties
+# Windows shortcuts
+*.lnk
 
 
-*.apk
+# cocos studio
+*.udf
 
-# Generated documentation, it can be regenerated using doxygen #
-######################
-docs/html/*
-
-######################
-linux-build/
-cocos2d/
-CMakeFiles/
-CMakeCache.txt
-Makefile
-cmake_install.cmake
+# proj.android
 bin/
-proj.ios_mac/build/
-proj.android/project.properties
+proj.android/assets/
+proj.android/bin/
+proj.android/gen/
+proj.android/libs/
+proj.android/local.properties
+proj.android/obj/
+cocos2d/cocos/platform/android/java/bin/
+cocos2d/cocos/platform/android/java/gen/
+cocos2d/cocos/platform/android/java/local.properties
+cocos2d/cocos/platform/android/java/res/
+.metadata/
+.recommenders/
 
+# proj.android-studio
+*.iml
+proj.android-studio/app/assets/
+proj.android-studio/app/obj/
+proj.android-studio/app/libs/armeabi/
+#proj.android-studio/app/gradle.properties
+proj.android-studio/app/local.properties
+proj.android-studio/*/build/
+cocos2d/cocos/platform/android/libcocos2dx/build/
+
+# proj.ios_mac
+cocos2d/build/build/
+cocos2d/build/cocos2d_libs.xcodeproj/xcuserdata/
+proj.ios_mac/build/
+proj.ios_mac/*.xcodeproj/project.xcworkspace
+proj.ios_mac/*.xcodeproj/xcuserdata/
+!*.pch
+
+# proj.linux
+
+# proj.win32
+cocos2d/cocos/2d/Debug.*/
+cocos2d/cocos/editor-support/spine/proj.win32/Debug.*/
+cocos2d/external/Box2D/proj.win32/Debug.*/
+cocos2d/external/bullet/proj.win32/Debug.*/
+cocos2d/external/recast/proj.win32/Debug.*/
+cocos2d/cocos/2d/Release.*/
+cocos2d/cocos/editor-support/spine/proj.win32/Release.*/
+cocos2d/external/Box2D/proj.win32/Release.*/
+cocos2d/external/bullet/proj.win32/Release.*/
+cocos2d/external/recast/proj.win32/Release.*/
+proj.win32/*.sdf
+proj.win32/*.opensdf
+proj.win32/Debug.*/
+proj.win32/Release.*/
+
+# proj.win8.1-universal
+
+# others
+cocos2d/
+*.VC.db
+*.VC.opendb
+*.suo
+/linux-build
+
+
+*.keystore
+/Resources/sdkbox_config.json
+.sdkbox_packages.json
+proj.android/jni/sdkbox/*
+CMakeLists.txt
