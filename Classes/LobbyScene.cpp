@@ -26,30 +26,29 @@ bool LobbyScene::init() {
   } else {
     pink_pencil_sprite->setScale(0.8f);
     pink_pencil_sprite->setPosition(center_.x - 400, center_.y + 200);
-    ui_node_->addChild(pink_pencil_sprite, 0);
+    ui_node_->addChild(pink_pencil_sprite);
   }
-
   auto blue_pencil_sprite = Sprite::create("sprites/BluePencil.png");
   if (blue_pencil_sprite == nullptr) {
     ProblemLoading("'sprites/BluePencil.png'");
   } else {
     blue_pencil_sprite->setScale(0.8f);
     blue_pencil_sprite->setPosition(center_.x + 400, center_.y + 200);
-    ui_node_->addChild(blue_pencil_sprite, 0);
+    ui_node_->addChild(blue_pencil_sprite);
   }
 
-  auto sun_sprite = Sprite::create("sprites/Sun.png");
+  auto sun_sprite = Sprite::create("sprites/Sun2.png");
   if (sun_sprite == nullptr) {
     ProblemLoading("'sprites/Sun.png'");
   } else {
-    sun_sprite->setScale(0.07f);
+    sun_sprite->setScale(0.5f);
     sun_sprite->setPosition(center_.x, center_.y + 100);
-    ui_node_->addChild(sun_sprite, 0);
+    ui_node_->addChild(sun_sprite);
   }
 
-  const auto sun_rotation_action = RotateBy::create(10, 360);
-  const auto sun_rotation_sequence = Sequence::create(sun_rotation_action, 0);
-  const auto sun_rotation_repeat = RepeatForever::create(sun_rotation_sequence);
+  auto sun_rotation_action = RotateBy::create(20, 360);
+  auto sun_rotation_sequence = Sequence::create(sun_rotation_action, nullptr);
+  auto sun_rotation_repeat = RepeatForever::create(sun_rotation_sequence);
   sun_sprite->runAction(sun_rotation_repeat);
 
   CreateButton();
@@ -63,7 +62,7 @@ void LobbyScene::CreateButton() {
   single_play_button->addTouchEventListener([&, single_play_button](Ref* sender, Widget::TouchEventType type) {
     if (type == Widget::TouchEventType::BEGAN) {
       auto audio = SimpleAudioEngine::getInstance();
-      audio->playEffect("Sounds/ButtonClick.mp3");
+      audio->playEffect("sounds/ButtonClick.mp3");
       const auto scale_action = ScaleTo::create(0.2f, 1.2f);
       single_play_button->runAction(scale_action);
     } else if (type == Widget::TouchEventType::ENDED) {

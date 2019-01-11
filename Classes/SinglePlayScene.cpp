@@ -100,7 +100,7 @@ void SinglePlayScene::update(float dt) {
 }
 
 void SinglePlayScene::RequestStageInfo(int stage_id) {
-  std::string url = "192.168.0.166:3000/stage/req/" + std::to_string(stage_id);
+  std::string url = "http://192.168.0.166:3000/stage/req/" + std::to_string(stage_id);
   using namespace network;
   auto request = new HttpRequest();
   request->setUrl(url.c_str());
