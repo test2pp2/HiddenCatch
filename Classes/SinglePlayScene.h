@@ -20,6 +20,9 @@ public:
 private:
   void update(float dt);
 
+  void RequestStageInfo(int stage_id);
+  void CreateLoadingAsset();
+
   void CreateTimer();
   void OnUpdateTimer(float dt);
 
@@ -45,6 +48,8 @@ private:
 
   Sprite* timer_bar_sprite_ = nullptr;
   ProgressTimer* progress_timer_bar_;
+
+  Node* loading_ui_node_ = nullptr;
   
   CREATE_FUNC(SinglePlayScene);
 };

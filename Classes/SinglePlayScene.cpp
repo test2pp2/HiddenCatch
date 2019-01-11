@@ -1,8 +1,18 @@
 #include "SinglePlayScene.h"
 #include "SimpleAudioEngine.h"
 #include "ConstHiddenCatch.h"
+#include "User.h"
+#include "json11.hpp"
 
 USING_NS_CC;
+
+struct StageInfo {
+  int max_stage_id;
+  int stage_id;
+  std::string left_image_url;
+  std::string right_image_url;
+
+};
 
 Scene* SinglePlayScene::createScene()
 {
@@ -29,6 +39,10 @@ bool SinglePlayScene::init()
   Vec2 origin = Director::getInstance()->getVisibleOrigin();
   center_ = Vec2(visibleSize.width / 2.0f + origin.x, visibleSize.height / 2.0f + origin.y);
 
+  RequestStageInfo(User::GetLastStageId());
+  CreateLoadingAsset();
+
+  /*
   loading_label_ = Label::createWithTTF("Loading...", "fonts/BMDOHYEON.ttf", 50);
   if (loading_label_ == nullptr) {
     problemLoading("'fonts/Marker Felt.ttf'");
@@ -44,6 +58,7 @@ bool SinglePlayScene::init()
     bottom_background_sprite_->setPosition(Vec2(center_.x, kBottomSpriteHeight / 2.0f));
     this->addChild(bottom_background_sprite_, 0);
   }
+  */
 
   // 이미지 위치 지정
   left_image_position_.x  = (center_.x - (kTimerSpriteWidth / 2.0f)) - (kImageWidth / 2.0f);
@@ -51,8 +66,8 @@ bool SinglePlayScene::init()
   right_image_position_.x = (center_.x + (kTimerSpriteWidth / 2.0f)) + (kImageWidth / 2.0f);
   right_image_position_.y =  center_.y + kBottomSpriteHeight / 2.0f;
 
-  StartDownloadLeftImage("https://s3.ap-northeast-2.amazonaws.com/img.repository/0/left/bbbbb.png");
-  StartDownloadRightImage("https://s3.ap-northeast-2.amazonaws.com/img.repository/0/left/bbbbb.png");
+  //StartDownloadLeftImage("https://s3.ap-northeast-2.amazonaws.com/img.repository/0/left/bbbbb.png");
+  //StartDownloadRightImage("https://s3.ap-northeast-2.amazonaws.com/img.repository/0/left/bbbbb.png");
 
   auto touch_listener = EventListenerTouchOneByOne::create();
   touch_listener->setSwallowTouches(true);
@@ -82,6 +97,62 @@ bool SinglePlayScene::init()
 
 void SinglePlayScene::update(float dt) {
 
+}
+
+void SinglePlayScene::RequestStageInfo(int stage_id) {
+  std::string url = "192.168.0.166:3000/stage/req/" + std::to_string(stage_id);
+  using namespace network;
+  auto request = new HttpRequest();
+  request->setUrl(url.c_str());
+  request->setRequestType(HttpRequest::Type::GET);
+  request->setResponseCallback([&, this] (
+      network::HttpClient* sender,
+      network::HttpResponse* response
+    ) {
+
+    if (!response) {
+      return;
+    }
+
+    const auto response_code = response->getResponseCode();
+    if (!response->isSucceed()) {
+      return;
+    }
+
+    if (response_code != 200) {
+      return;
+    }
+
+    std::string err;
+    std::vector<char>* buffer = response->getResponseData();
+    char* concatenated = (char*)malloc(buffer->size() + 1);
+    std::string string2(buffer->begin(), buffer->end());
+    strcpy(concatenated, string2.c_str());
+    auto json_object = json11::Json::parse(concatenated, err);
+    auto top_user_name = json_object["top_user"].string_value();
+    
+    auto loading_label = Label::createWithTTF(ccsf2("%s", top_user_name.c_str()), NormalFont, 80);
+    loading_label->setPosition(Vec2(center_.x, center_.y - 200.0f));
+    loading_label->setColor(Color3B(255, 255, 255));
+    loading_label->enableShadow(Color4B::BLACK, Size(2, -2), 0);
+    loading_label->enableOutline(Color4B::BLACK, 5);
+    loading_ui_node_->addChild(loading_label);
+  });
+
+  HttpClient::getInstance()->send(request);
+  request->release();
+}
+
+void SinglePlayScene::CreateLoadingAsset() {
+  loading_ui_node_ = Node::create();
+  addChild(loading_ui_node_, 0);
+
+  auto loading_label = Label::createWithTTF("Loading...", NormalFont, 80);
+  loading_label->setPosition(Vec2(center_.x, center_.y + 100.0f));
+  loading_label->setColor(Color3B(255, 255, 255));
+  loading_label->enableShadow(Color4B::BLACK, Size(2, -2), 0);
+  loading_label->enableOutline(Color4B::BLACK, 5);
+  loading_ui_node_->addChild(loading_label);
 }
 
 void SinglePlayScene::CreateTimer() {

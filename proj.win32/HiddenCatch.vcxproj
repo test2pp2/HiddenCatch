@@ -151,9 +151,11 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\CommonPlayUtil.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
+    <ClCompile Include="..\Classes\json11.cpp" />
     <ClCompile Include="..\Classes\LobbyScene.cpp" />
     <ClCompile Include="..\Classes\OptionScene.cpp" />
     <ClCompile Include="..\Classes\SinglePlayScene.cpp" />
+    <ClCompile Include="..\Classes\User.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -161,9 +163,11 @@ xcopy "$(ProjectDir)..\Resources" "$(OutDir)\Resources\" /D /E /I /F /Y
     <ClInclude Include="..\Classes\CommonPlayUtil.h" />
     <ClInclude Include="..\Classes\ConstHiddenCatch.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
+    <ClInclude Include="..\Classes\json11.hpp" />
     <ClInclude Include="..\Classes\LobbyScene.h" />
     <ClInclude Include="..\Classes\OptionScene.h" />
     <ClInclude Include="..\Classes\SinglePlayScene.h" />
+    <ClInclude Include="..\Classes\User.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <ItemGroup>
