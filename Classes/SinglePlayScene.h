@@ -7,7 +7,7 @@
 
 using namespace cocos2d;
 
-class SinglePlayScene : public cocos2d::Scene
+class SinglePlay : public cocos2d::Scene
 {
 public:
   static cocos2d::Scene* createScene();
@@ -20,7 +20,7 @@ public:
 private:
   void update(float dt);
 
-  void RequestStageInfo(int stage_id);
+  void RequestStageInfo(int stage_id, std::string uid);
   void CreateLoadingAsset();
 
   void CreateTimer();
@@ -51,7 +51,7 @@ private:
 
   Node* loading_ui_node_ = nullptr;
   
-  CREATE_FUNC(SinglePlayScene);
+  CREATE_FUNC(SinglePlay);
 };
 
 #endif // __SINGLE_PLAY_SCENE_H__

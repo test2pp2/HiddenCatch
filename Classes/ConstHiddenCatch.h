@@ -11,6 +11,9 @@ const float kImageHeight = 950.0f;
 // ImageSize = 940 x 950
 
 static const std::string NormalFont = "fonts/BMDOHYEON.ttf";
+//static const std::string WebServerUrl = "http://192.168.0.166:3000";
+static const std::string WebServerUrl = "http://127.0.0.1:3000";
+
 #define ccsf2(...) CCString::createWithFormat(__VA_ARGS__)->getCString()
 
 #endif

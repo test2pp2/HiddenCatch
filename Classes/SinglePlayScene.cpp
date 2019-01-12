@@ -14,9 +14,9 @@ struct StageInfo {
 
 };
 
-Scene* SinglePlayScene::createScene()
+Scene* SinglePlay::createScene()
 {
-  return SinglePlayScene::create();
+  return SinglePlay::create();
 }
 
 // Print useful error message instead of segfaulting when files are not there.
@@ -26,7 +26,7 @@ static void problemLoading(const char* filename) {
 }
 
 // on "init" you need to initialize your instance
-bool SinglePlayScene::init()
+bool SinglePlay::init()
 {
   //////////////////////////////
   // 1. super init first
@@ -39,7 +39,7 @@ bool SinglePlayScene::init()
   Vec2 origin = Director::getInstance()->getVisibleOrigin();
   center_ = Vec2(visibleSize.width / 2.0f + origin.x, visibleSize.height / 2.0f + origin.y);
 
-  RequestStageInfo(User::GetLastStageId());
+  RequestStageInfo(User::GetLastStageId(), User::Instance().user_id());
   CreateLoadingAsset();
 
   /*
@@ -95,12 +95,12 @@ bool SinglePlayScene::init()
   return true;
 }
 
-void SinglePlayScene::update(float dt) {
+void SinglePlay::update(float dt) {
 
 }
 
-void SinglePlayScene::RequestStageInfo(int stage_id) {
-  std::string url = "http://192.168.0.166:3000/stage/req/" + std::to_string(stage_id);
+void SinglePlay::RequestStageInfo(int stage_id, std::string uid) {
+  std::string url = WebServerUrl + "/stage/req/" + uid + "/" + std::to_string(stage_id);
   using namespace network;
   auto request = new HttpRequest();
   request->setUrl(url.c_str());
@@ -109,7 +109,6 @@ void SinglePlayScene::RequestStageInfo(int stage_id) {
       network::HttpClient* sender,
       network::HttpResponse* response
     ) {
-
     if (!response) {
       return;
     }
@@ -143,7 +142,7 @@ void SinglePlayScene::RequestStageInfo(int stage_id) {
   request->release();
 }
 
-void SinglePlayScene::CreateLoadingAsset() {
+void SinglePlay::CreateLoadingAsset() {
   loading_ui_node_ = Node::create();
   addChild(loading_ui_node_, 0);
 
@@ -155,7 +154,7 @@ void SinglePlayScene::CreateLoadingAsset() {
   loading_ui_node_->addChild(loading_label);
 }
 
-void SinglePlayScene::CreateTimer() {
+void SinglePlay::CreateTimer() {
   timer_bar_sprite_ = Sprite::create("sprites/TimerBar.png");
 
   auto timer_outline_sprite = Sprite::create("sprites/TimerOutliner.png");
@@ -171,10 +170,10 @@ void SinglePlayScene::CreateTimer() {
   progress_timer_bar_->setPercentage(100);
   this->addChild(progress_timer_bar_, 1);
   // 타이머 스케줄 시작
-  this->schedule(SEL_SCHEDULE(&SinglePlayScene::OnUpdateTimer), 1.0f / 10.0f);
+  this->schedule(SEL_SCHEDULE(&SinglePlay::OnUpdateTimer), 1.0f / 10.0f);
 }
 
-void SinglePlayScene::OnUpdateTimer(float /*dt*/) {
+void SinglePlay::OnUpdateTimer(float /*dt*/) {
   const float kTimerMaxSec = 45;
   const float percentage = progress_timer_bar_->getPercentage();
   CCLOG("Percentage: %f", percentage);
@@ -182,7 +181,7 @@ void SinglePlayScene::OnUpdateTimer(float /*dt*/) {
   //progress_timeer_bar_->setPercentage(percentage - 100.0f / (60.0f * kTimerMaxSec));
 }
 
-void SinglePlayScene::menuCloseCallback(Ref* pSender)
+void SinglePlay::menuCloseCallback(Ref* pSender)
 {
   //Close the cocos2d-x game scene and quit the application
   Director::getInstance()->end();
@@ -199,16 +198,16 @@ void SinglePlayScene::menuCloseCallback(Ref* pSender)
 
 }
 
-void SinglePlayScene::StartDownloadLeftImage(std::string url) {
+void SinglePlay::StartDownloadLeftImage(std::string url) {
   network::HttpRequest* request = new (std::nothrow) network::HttpRequest();
   request->setUrl(url.c_str());
   request->setRequestType(network::HttpRequest::Type::GET);
-  request->setResponseCallback(CC_CALLBACK_2(SinglePlayScene::OnCompleteDownloadLeftImage, this));
+  request->setResponseCallback(CC_CALLBACK_2(SinglePlay::OnCompleteDownloadLeftImage, this));
   network::HttpClient::getInstance()->send(request);
   request->release();
 }
 
-void SinglePlayScene::OnCompleteDownloadLeftImage(
+void SinglePlay::OnCompleteDownloadLeftImage(
   network::HttpClient* sender, 
   network::HttpResponse* response
 ) {
@@ -232,16 +231,16 @@ void SinglePlayScene::OnCompleteDownloadLeftImage(
   OnCompleteDownloadallImage();
 }
 
-void SinglePlayScene::StartDownloadRightImage(std::string url) {
+void SinglePlay::StartDownloadRightImage(std::string url) {
   network::HttpRequest* request = new (std::nothrow) network::HttpRequest();
   request->setUrl(url.c_str());
   request->setRequestType(network::HttpRequest::Type::GET);
-  request->setResponseCallback(CC_CALLBACK_2(SinglePlayScene::OnCompleteDownloadRightImage, this));
+  request->setResponseCallback(CC_CALLBACK_2(SinglePlay::OnCompleteDownloadRightImage, this));
   network::HttpClient::getInstance()->send(request);
   request->release();
 }
 
-void SinglePlayScene::OnCompleteDownloadRightImage(
+void SinglePlay::OnCompleteDownloadRightImage(
   network::HttpClient* sender,
   network::HttpResponse* response
 ) {
@@ -262,7 +261,7 @@ void SinglePlayScene::OnCompleteDownloadRightImage(
   OnCompleteDownloadallImage();
 }
 
-void SinglePlayScene::OnCompleteDownloadallImage() {
+void SinglePlay::OnCompleteDownloadallImage() {
   if (download_image_count_ >= 2) {
     CreateTimer();
   }

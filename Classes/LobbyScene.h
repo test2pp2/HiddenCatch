@@ -12,7 +12,7 @@ using namespace cocos2d;
 using namespace ui;
 using namespace CocosDenshion;
 
-class LobbyScene : public cocos2d::Scene
+class Lobby : public cocos2d::Scene
 {
 public:
   static cocos2d::Scene* createScene();
@@ -22,7 +22,7 @@ public:
   // a selector callback
   void menuCloseCallback(cocos2d::Ref* pSender);
 
-  CREATE_FUNC(LobbyScene);
+  CREATE_FUNC(Lobby);
 
 private:
   void CreateButton();

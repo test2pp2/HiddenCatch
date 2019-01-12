@@ -1,12 +1,13 @@
 #include "LobbyScene.h"
 #include "CommonPlayUtil.h"
 #include "SinglePlayScene.h"
+#include "User.h"
 
-Scene* LobbyScene::createScene() {
-  return LobbyScene::create();
+Scene* Lobby::createScene() {
+  return Lobby::create();
 }
 
-bool LobbyScene::init() {
+bool Lobby::init() {
   //////////////////////////////
   // 1. super init first
   if (!Scene::init()) {
@@ -51,12 +52,16 @@ bool LobbyScene::init() {
   auto sun_rotation_repeat = RepeatForever::create(sun_rotation_sequence);
   sun_sprite->runAction(sun_rotation_repeat);
 
+  // 먼저 게스트 계정 먼저 생성
+  User::Instance().set_user_id("1234");
+  
+
   CreateButton();
 
   return true;
 }
 
-void LobbyScene::CreateButton() {
+void Lobby::CreateButton() {
   auto single_play_button = Button::create("ui/SinglePlayButton.png", "ui/SinglePlayButton.png", "ui/SinglePlayButton.png");
   single_play_button->setPosition(Vec2(center_.x - 400.0f, center_.y - 280.0f));
   single_play_button->addTouchEventListener([&, single_play_button](Ref* sender, Widget::TouchEventType type) {
@@ -68,7 +73,7 @@ void LobbyScene::CreateButton() {
     } else if (type == Widget::TouchEventType::ENDED) {
       const auto scale_action = ScaleTo::create(0.2f, 1.0f);
       single_play_button->runAction(scale_action);
-      Director::getInstance()->replaceScene(SinglePlayScene::createScene());
+      Director::getInstance()->replaceScene(SinglePlay::createScene());
       return;
     } else if (type == Widget::TouchEventType::CANCELED) {
       const auto scale_action = ScaleTo::create(0.2f, 1.0f);
@@ -78,7 +83,7 @@ void LobbyScene::CreateButton() {
   ui_node_->addChild(single_play_button);
 }
 
-void LobbyScene::menuCloseCallback(Ref* pSender) {
+void Lobby::menuCloseCallback(Ref* pSender) {
   Director::getInstance()->end();
 
   /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() as given above,instead trigger a custom event created in RootViewController.mm as below*/
