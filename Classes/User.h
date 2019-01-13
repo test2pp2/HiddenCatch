@@ -15,12 +15,20 @@ public:
   std::string user_id() const;
   void set_user_id(std::string user_id);
 
+  int hint_count() const;
+  void set_hint_count(int hint_count);
+
+  int stop_timer_count() const;
+  void set_stop_timer_count(int stop_timer_count);
+
 private:
   User();
   User(const User& user) = delete;
   User& operator=(const User& user) = delete;
 
   std::string user_id_;
+  int hint_count_;
+  int stop_timer_count_;
 };
 
 #endif

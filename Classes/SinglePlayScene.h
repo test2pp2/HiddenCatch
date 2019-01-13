@@ -3,9 +3,13 @@
 
 #include "cocos2d.h"
 #include "ui/UILoadingBar.h"
+#include "ui/UIButton.h"
 #include "network/HttpClient.h"
+#include "SimpleAudioEngine.h"
 
 using namespace cocos2d;
+using namespace ui;
+using namespace CocosDenshion;
 
 class SinglePlay : public cocos2d::Scene
 {
@@ -24,6 +28,8 @@ private:
   void CreateLoadingAsset();
 
   void CreateTimer();
+  void CreateButton();
+  void CreateLabel();
   void OnUpdateTimer(float dt);
 
   void StartDownloadLeftImage(std::string url);
@@ -32,9 +38,20 @@ private:
   void OnCompleteDownloadRightImage(network::HttpClient* sender, network::HttpResponse* response);
   void OnCompleteDownloadallImage();
 
+  void OpenDoor(float duration);
+  void CloseDoor(float duration);
+
   Vec2 center_;
 
   Label* loading_label_ = nullptr;
+  Label* stage_label_ = nullptr;
+  Label* credit_label_ = nullptr;
+  Label* total_spot_count_label_ = nullptr;
+  Label* found_spot_count_label_ = nullptr;
+
+  int stage_count_ = 10;
+  int total_spot_count_ = 5;
+  int found_spot_count_ = 0;
 
   Texture2D left_image_texture;
   Texture2D right_image_texture;
@@ -50,7 +67,16 @@ private:
   ProgressTimer* progress_timer_bar_;
 
   Node* loading_ui_node_ = nullptr;
-  
+  Node* ui_node_ = nullptr;
+
+  Sprite* left_door_sprite_ = nullptr;
+  Sprite* right_door_sprite_ = nullptr;
+
+  Sprite* bottom_background_sprite_ = nullptr;
+
+  Button* pause_button_ = nullptr;
+  bool paused_ = true;
+
   CREATE_FUNC(SinglePlay);
 };
 

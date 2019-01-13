@@ -19,7 +19,7 @@ bool Lobby::init() {
   center_ = Vec2(visibleSize.width / 2.0f + origin.x, visibleSize.height / 2.0f + origin.y);
 
   ui_node_ = Node::create();
-  addChild(ui_node_, 1);
+  this->addChild(ui_node_, 1);
 
   auto pink_pencil_sprite = Sprite::create("sprites/PinkPencil.png");
   if (pink_pencil_sprite == nullptr) {
@@ -54,7 +54,8 @@ bool Lobby::init() {
 
   // 먼저 게스트 계정 먼저 생성
   User::Instance().set_user_id("1234");
-  
+  User::Instance().set_hint_count(10);
+  User::Instance().set_stop_timer_count(10);
 
   CreateButton();
 
