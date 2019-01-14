@@ -7,4 +7,11 @@ cocos2d::Vec2 ConvertImageToPlay(cocos2d::Vec2 image_position);
 
 void ProblemLoading(const char* filename);
 
+struct HiddenPoint {
+  float x;
+  float y;
+  int width;
+  int height;
+};
+
 #endif

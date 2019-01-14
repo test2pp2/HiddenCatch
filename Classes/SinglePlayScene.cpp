@@ -82,9 +82,6 @@ bool SinglePlay::init()
 
   CreateLoadingAsset();
 
-  StartDownloadLeftImage("https://s3.ap-northeast-2.amazonaws.com/img.repository/0/left/bbbbb.png");
-  StartDownloadRightImage("https://s3.ap-northeast-2.amazonaws.com/img.repository/0/left/bbbbb.png");
-
   auto touch_listener = EventListenerTouchOneByOne::create();
   touch_listener->setSwallowTouches(true);
   touch_listener->onTouchBegan = [&](Touch* touch, Event* event) {
@@ -96,6 +93,19 @@ bool SinglePlay::init()
   touch_listener->onTouchEnded = [&](Touch* touch, Event* event) {
     Vec2 point = touch->getLocation();
     CCLOG("end touch x: %f, touch y: %f", point.x, point.y);
+    if (left_hidden_rects_.size() <= 0) {
+      return false;
+    }
+    for (const auto& hidden_rect : left_hidden_rects_) {
+      if (hidden_rect.containsPoint(point)) {
+        CCLOG("Left Found");
+      }
+    }
+    for (const auto& hidden_rect : right_hidden_rects_) {
+      if (hidden_rect.containsPoint(point)) {
+        CCLOG("Right Found");
+      }
+    }
     return true;
   };
 
@@ -111,7 +121,7 @@ bool SinglePlay::init()
   this->addChild(ui_node_, 2);
   CreateTimer();
   CreateButton();
-  CreateLabel();
+  //CreateLabel();
   return true;
 }
 
@@ -121,7 +131,7 @@ void SinglePlay::update(float dt) {
 
 //===========================================================================
 void SinglePlay::RequestStageInfo(int stage_id, std::string uid) {
-  std::string url = WebServerUrl + "/stage/req/" + uid + "/" + std::to_string(stage_id);
+  std::string url = WebServerUrl + "/stage/req/" + std::to_string(stage_id) + "/" + uid;
   using namespace network;
   auto request = new HttpRequest();
   request->setUrl(url.c_str());
@@ -149,14 +159,50 @@ void SinglePlay::RequestStageInfo(int stage_id, std::string uid) {
     std::string string2(buffer->begin(), buffer->end());
     strcpy(concatenated, string2.c_str());
     auto json_object = json11::Json::parse(concatenated, err);
-    auto top_user_name = json_object["top_user"].string_value();
+
+    hidden_points_.clear();
+    left_hidden_rects_.clear();
+    right_hidden_rects_.clear();
+
+    for (auto& hidden_point : json_object["hidden_points"].array_items()) {
+      HiddenPoint tmp;
+      tmp.x = static_cast<float>(hidden_point["x"].int_value());
+      tmp.y = static_cast<float>(hidden_point["y"].int_value());
+      tmp.width = hidden_point["width"].int_value();
+      tmp.height = hidden_point["height"].int_value();
+      hidden_points_.emplace_back(tmp);
+    }
+
+    auto current_stage_count = json_object["current_stage_count"].int_value();
+    auto total_stage_count = json_object["total_stage_count"].int_value();
+
+    total_hidden_point_count_ = hidden_points_.size();
+    CreateLabel(current_stage_count + 1, total_stage_count);
+
+    auto left_image_url = json_object["left_image_url"].string_value();
+    auto right_image_url = json_object["right_image_url"].string_value();
+    StartDownloadLeftImage(left_image_url.c_str());
+    StartDownloadRightImage(right_image_url.c_str());
+
+    for (auto hidden_point : hidden_points_) {
+      auto x = hidden_point.x - (hidden_point.width * 0.5f);
+      auto y = (hidden_point.y + kTimerOutlinerHeight + kBottomSpriteHeight) - (hidden_point.height * 0.5f);
+      Rect left_rect(x, y, hidden_point.width, hidden_point.height);
+      left_hidden_rects_.push_back(left_rect);
+
+      Rect right_rect(x + kMiddleSpace + kImageWidth, y, hidden_point.width, hidden_point.height);
+      right_hidden_rects_.push_back(right_rect);
+    }
     
+    /*
+    auto top_user_name = json_object["top_user"].string_value();
     auto loading_label = Label::createWithTTF(ccsf2("%s", top_user_name.c_str()), NormalFont, 80);
     loading_label->setPosition(Vec2(center_.x, center_.y - 200.0f));
     loading_label->setColor(Color3B(255, 255, 255));
     loading_label->enableShadow(Color4B::BLACK, Size(2, -2), 0);
     loading_label->enableOutline(Color4B::BLACK, 5);
     loading_ui_node_->addChild(loading_label);
+    */
   });
 
   HttpClient::getInstance()->send(request);
@@ -201,7 +247,7 @@ void SinglePlay::OnUpdateTimer(float /*dt*/) {
   }
   const float kTimerMaxSec = 45;
   const float percentage = progress_timer_bar_->getPercentage();
-  CCLOG("Percentage: %f", percentage);
+  //CCLOG("Percentage: %f", percentage);
   progress_timer_bar_->setPercentage(percentage - (100 / (kTimerMaxSec * 10)));
   const float current_percentage = progress_timer_bar_->getPercentage();
   if (current_percentage <= 0.0f) {
@@ -302,8 +348,8 @@ void SinglePlay::CreateButton() {
 // 
 // 스테이지 및 크레딧 라벨 생성
 //
-void SinglePlay::CreateLabel() {
-  stage_label_ = Label::createWithTTF(ccsf2("STAGE  %d", stage_count_), NormalFont, 30);
+void SinglePlay::CreateLabel(int current_stage_count, int total_stage_count) {
+  stage_label_ = Label::createWithTTF(ccsf2("STAGE  %d / %d", current_stage_count, total_stage_count), NormalFont, 30);
   stage_label_->setPosition(
     stage_label_->getContentSize().width / 2.0f + 20.0f,
     stage_label_->getContentSize().height / 2.0f + 20.0f
@@ -313,7 +359,7 @@ void SinglePlay::CreateLabel() {
   stage_label_->enableOutline(Color4B::BLACK, 2);
   ui_node_->addChild(stage_label_);
 
-  total_spot_count_label_ = Label::createWithTTF(ccsf2("%d", total_spot_count_), NormalFont, 60);
+  total_spot_count_label_ = Label::createWithTTF(ccsf2("%d", total_hidden_point_count_), NormalFont, 60);
   total_spot_count_label_->setPosition(
     bottom_background_sprite_->getPosition()
   );

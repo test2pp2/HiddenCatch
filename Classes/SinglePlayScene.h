@@ -6,6 +6,7 @@
 #include "ui/UIButton.h"
 #include "network/HttpClient.h"
 #include "SimpleAudioEngine.h"
+#include "CommonPlayUtil.h"
 
 using namespace cocos2d;
 using namespace ui;
@@ -29,7 +30,7 @@ private:
 
   void CreateTimer();
   void CreateButton();
-  void CreateLabel();
+  void CreateLabel(int current_stage_count, int total_stage_count);
   void OnUpdateTimer(float dt);
 
   void StartDownloadLeftImage(std::string url);
@@ -50,8 +51,8 @@ private:
   Label* found_spot_count_label_ = nullptr;
 
   int stage_count_ = 10;
-  int total_spot_count_ = 5;
-  int found_spot_count_ = 0;
+  int total_hidden_point_count_ = 5;
+  int found_hidden_point_count_ = 0;
 
   Texture2D left_image_texture;
   Texture2D right_image_texture;
@@ -76,6 +77,10 @@ private:
 
   Button* pause_button_ = nullptr;
   bool paused_ = true;
+
+  std::vector<HiddenPoint> hidden_points_;
+  std::vector<Rect> left_hidden_rects_;
+  std::vector<Rect> right_hidden_rects_;
 
   CREATE_FUNC(SinglePlay);
 };

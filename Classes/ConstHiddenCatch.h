@@ -23,3 +23,5 @@ static const std::string WebServerUrl = "http://127.0.0.1:3000";
 
 
 #endif
+
+// 957 * 2 + 6

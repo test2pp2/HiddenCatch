@@ -84,7 +84,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
     auto glview = director->getOpenGLView();
     if(!glview) {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) || (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) || (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX)
-        glview = GLViewImpl::createWithRect("HiddenCatch", cocos2d::Rect(0, 0, designResolutionSize.width / 2.0f, designResolutionSize.height / 2.0f));
+        //glview = GLViewImpl::createWithRect("HiddenCatch", cocos2d::Rect(0, 0, designResolutionSize.width / 2.0f, designResolutionSize.height / 2.0f));
+      glview = GLViewImpl::createWithRect("HiddenCatch", cocos2d::Rect(0, 0, 2048 / 2.0f, 1536 / 2.0f));
 #else
         glview = GLViewImpl::create("HiddenCatch");
 #endif
