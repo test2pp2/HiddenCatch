@@ -12,6 +12,7 @@ struct HiddenPoint {
   float y;
   int width;
   int height;
+  bool found = false;
 };
 
 #endif

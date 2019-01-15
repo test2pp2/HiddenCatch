@@ -55,22 +55,12 @@ bool SinglePlay::init()
     bottom_background_sprite_->setPosition(Vec2(center_.x, kBottomSpriteHeight / 2.0f));
     this->addChild(bottom_background_sprite_);
   }
-  
 
   // 이미지 위치 지정
   left_image_position_.x  = center_.x - (kImageWidth / 2.0f) - (kMiddleSpace/2.0f);
   left_image_position_.y  = center_.y + (kBottomSpriteHeight  + kTimerOutlinerHeight) / 2.0f;
   right_image_position_.x = center_.x + (kImageWidth / 2.0f) + (kMiddleSpace / 2.0f);
   right_image_position_.y = center_.y + (kBottomSpriteHeight + kTimerOutlinerHeight) / 2.0f;
-
-  /*
-  auto test_sprite = Sprite::create("sprites/Test.png");
-  test_sprite->setPosition(left_image_position_.x, left_image_position_.y);
-  this->addChild(test_sprite, 0);
-  auto test_sprite2 = Sprite::create("sprites/Test.png");
-  test_sprite2->setPosition(right_image_position_.x, right_image_position_.y);
-  this->addChild(test_sprite2, 0);
-  */
 
   left_door_sprite_ = Sprite::create("sprites/LeftDoor.png");
   left_door_sprite_->setPosition(left_image_position_.x, left_image_position_.y);
@@ -85,27 +75,35 @@ bool SinglePlay::init()
   auto touch_listener = EventListenerTouchOneByOne::create();
   touch_listener->setSwallowTouches(true);
   touch_listener->onTouchBegan = [&](Touch* touch, Event* event) {
-    //Vec2 point = touch->getLocation();
-    //CCLOG("start touch x: %f, touch y: %f", point.x, point.y);
-    return true;
-  };
-
-  touch_listener->onTouchEnded = [&](Touch* touch, Event* event) {
     Vec2 point = touch->getLocation();
     CCLOG("end touch x: %f, touch y: %f", point.x, point.y);
     if (left_hidden_rects_.size() <= 0) {
       return false;
     }
-    for (const auto& hidden_rect : left_hidden_rects_) {
-      if (hidden_rect.containsPoint(point)) {
+
+    for (auto i = 0; i < left_hidden_rects_.size(); ++i) {
+      if (hidden_points_[i].found) {
+        continue;
+      }
+      if (left_hidden_rects_[i].containsPoint(point)) {
         CCLOG("Left Found");
+        HandleCorrectPoint(i);
       }
     }
-    for (const auto& hidden_rect : right_hidden_rects_) {
-      if (hidden_rect.containsPoint(point)) {
+    //hidden_points_
+    for (auto i = 0; i < right_hidden_rects_.size(); ++i) {
+      if (hidden_points_[i].found) {
+        continue;
+      }
+      if (right_hidden_rects_[i].containsPoint(point)) {
         CCLOG("Right Found");
+        HandleCorrectPoint(i);
       }
     }
+    return true;
+  };
+
+  touch_listener->onTouchEnded = [&](Touch* touch, Event* event) {
     return true;
   };
 
@@ -209,7 +207,11 @@ void SinglePlay::RequestStageInfo(int stage_id, std::string uid) {
   request->release();
 }
 
-//===========================================================================
+//***************************************************************************
+//*
+//*  로딩 화면
+//*
+//***
 void SinglePlay::CreateLoadingAsset() {
   loading_label_ = Label::createWithTTF("Loading...", NormalFont, 80);
   loading_label_->setPosition(Vec2(center_.x, center_.y + 100.0f));
@@ -219,7 +221,11 @@ void SinglePlay::CreateLoadingAsset() {
   this->addChild(loading_label_, 2);
 }
 
-//===========================================================================
+//***************************************************************************
+//*
+//*  타이머 생성
+//*
+//***
 void SinglePlay::CreateTimer() {
   timer_bar_sprite_ = Sprite::create("sprites/TimerBar.png");
   timer_bar_sprite_->setColor(Color3B(0, 255, 0));
@@ -240,7 +246,11 @@ void SinglePlay::CreateTimer() {
   this->schedule(SEL_SCHEDULE(&SinglePlay::OnUpdateTimer), 1.0f / 10.0f);
 }
 
-//===========================================================================
+//***************************************************************************
+//*
+//* 타이머 업데이트
+//*
+//***
 void SinglePlay::OnUpdateTimer(float /*dt*/) {
   if (paused_) {
     return;
@@ -400,6 +410,7 @@ void SinglePlay::OnCompleteDownloadLeftImage(
   network::HttpResponse* response
 ) {
   if (!response || !response->isSucceed()) {
+    // TODO(test2): exception 처리
     // 네트워크 상태가 좋지않습니다.
     return;
   }
@@ -431,6 +442,7 @@ void SinglePlay::OnCompleteDownloadRightImage(
   network::HttpResponse* response
 ) {
   if (!response || !response->isSucceed()) {
+    // TODO(test2): exception 처리
     // 네트워크 상태가 좋지않습니다.
     return;
   }
@@ -504,4 +516,34 @@ void SinglePlay::CloseDoor(float duration) {
     Vec2(right_image_position_)
   );
   right_door_sprite_->runAction(move_to);
+}
+
+void SinglePlay::HandleCorrectPoint(size_t index) {
+  hidden_points_[index].found = true;
+  StartCircleAnimation(Vec2(hidden_points_[index].x, hidden_points_[index].y));
+  total_spot_count_label_->setString(ccsf2("%d", --total_hidden_point_count_));
+}
+
+void SinglePlay::StartCircleAnimation(const Vec2& pos) {
+  const Vec2 left_pos  = { pos.x, pos.y + kTimerOutlinerHeight + kBottomSpriteHeight };
+  const Vec2 right_pos = { pos.x + kMiddleSpace + kImageWidth, left_pos.y };
+  auto circle_animation = Animation::create();
+  circle_animation->setDelayPerUnit(0.1f);
+  circle_animation->addSpriteFrameWithFile("animation/CorrectCircle/Circle_0.png");
+  circle_animation->addSpriteFrameWithFile("animation/CorrectCircle/Circle_1.png");
+  circle_animation->addSpriteFrameWithFile("animation/CorrectCircle/Circle_2.png");
+  circle_animation->addSpriteFrameWithFile("animation/CorrectCircle/Circle_3.png");
+  circle_animation->addSpriteFrameWithFile("animation/CorrectCircle/Circle_4.png");
+
+  auto left_correct_circle = Sprite::create("animation/CorrectCircle/Circle_0.png");
+  left_correct_circle->setPosition(left_pos);
+  left_correct_circle->setScale(0.5f);
+  left_correct_circle->runAction(Animate::create(circle_animation));
+  this->addChild(left_correct_circle);
+
+  auto right_correct_circle = Sprite::create("animation/CorrectCircle/Circle_0.png");
+  right_correct_circle->setPosition(right_pos);
+  right_correct_circle->setScale(0.5f);
+  right_correct_circle->runAction(Animate::create(circle_animation));
+  this->addChild(right_correct_circle);
 }

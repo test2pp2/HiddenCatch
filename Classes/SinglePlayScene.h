@@ -42,6 +42,9 @@ private:
   void OpenDoor(float duration);
   void CloseDoor(float duration);
 
+  void HandleCorrectPoint(size_t index);
+  void StartCircleAnimation(const Vec2& pos);
+
   Vec2 center_;
 
   Label* loading_label_ = nullptr;
