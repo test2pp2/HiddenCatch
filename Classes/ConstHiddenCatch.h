@@ -20,7 +20,7 @@ static const std::string NormalFont = "fonts/BMDOHYEON.ttf";
 
 //static const std::string WebServerUrl = "http://192.168.0.166:3000";
 //static const std::string WebServerUrl = "http://127.0.0.1:3000";
-static const std::string WebServerUrl = "http://n.05day.com:3000";
+static const std::string WebServerUrl = "http://n.05day.com:3002";
 
 #endif
 

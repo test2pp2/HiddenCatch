@@ -17,17 +17,31 @@ Scene* SinglePlay::createScene()
   return SinglePlay::create();
 }
 
+static void SetEnableButton(Button* button) {
+  button->setBright(true);
+  button->setEnabled(true);
+}
+
+static void SetDisableButton(Button* button) {
+  button->setBright(false);
+  button->setEnabled(false);
+}
+
+static int FindHiddenPointIndex(const std::vector<HiddenPoint>& hidden_point) {
+  for (auto i = 0; i < hidden_point.size(); ++i) {
+    if (!hidden_point[i].found) return i;
+  }
+  return -1;
+}
+
 // Print useful error message instead of segfaulting when files are not there.
 static void problemLoading(const char* filename) {
   printf("Error while loading: %s\n", filename);
   printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
-// on "init" you need to initialize your instance
 bool SinglePlay::init()
 {
-  //////////////////////////////
-  // 1. super init first
   if (!Scene::init())
   {
     return false;
@@ -207,11 +221,11 @@ void SinglePlay::RequestStageInfo(int stage_id, std::string uid) {
   request->release();
 }
 
-//***************************************************************************
-//*
-//*  로딩 화면
-//*
-//***
+/***************************************************************************
+/*
+/*  로딩 화면
+/*
+***/
 void SinglePlay::CreateLoadingAsset() {
   loading_label_ = Label::createWithTTF("Loading...", NormalFont, 80);
   loading_label_->setPosition(Vec2(center_.x, center_.y + 100.0f));
@@ -221,11 +235,11 @@ void SinglePlay::CreateLoadingAsset() {
   this->addChild(loading_label_, 2);
 }
 
-//***************************************************************************
-//*
-//*  타이머 생성
-//*
-//***
+/***************************************************************************
+/*
+/*  타이머 생성
+/*
+***/
 void SinglePlay::CreateTimer() {
   timer_bar_sprite_ = Sprite::create("sprites/TimerBar.png");
   timer_bar_sprite_->setColor(Color3B(0, 255, 0));
@@ -246,13 +260,13 @@ void SinglePlay::CreateTimer() {
   this->schedule(SEL_SCHEDULE(&SinglePlay::OnUpdateTimer), 1.0f / 10.0f);
 }
 
-//***************************************************************************
-//*
-//* 타이머 업데이트
-//*
-//***
+/***************************************************************************
+/*
+/* 타이머 업데이트
+/*
+***/
 void SinglePlay::OnUpdateTimer(float /*dt*/) {
-  if (paused_) {
+  if (paused_ || stopped_timer) {
     return;
   }
   const float kTimerMaxSec = 45;
@@ -271,7 +285,11 @@ void SinglePlay::OnUpdateTimer(float /*dt*/) {
   //progress_timeer_bar_->setPercentage(percentage - 100.0f / (60.0f * kTimerMaxSec));
 }
 
-//===========================================================================
+/****************************************************************************
+*
+* 힌트 버튼 및 스탑 버튼 생성
+*
+***/
 void SinglePlay::CreateButton() {
   auto hint_button = Button::create("ui/HintButton.png", "ui/HintButton.png", "ui/HintButton.png");
   hint_button->setPosition(Vec2(center_.x + 300.0f, kBottomSpriteHeight / 2.0f));
@@ -287,11 +305,18 @@ void SinglePlay::CreateButton() {
       const auto scale_action = ScaleTo::create(0.1f, 1.0f);
       hint_button->runAction(scale_action);
 
+      auto index = FindHiddenPointIndex(hidden_points_);
+      if (index < 0) {
+        SetDisableButton(hint_button);
+        return;
+      }
       auto hint_count = User::Instance().hint_count();
-      --hint_count;
+      hint_count = std::max(0, --hint_count);
+      HandleCorrectPoint(index);
+
       User::Instance().set_hint_count(hint_count);
       if (hint_count <= 0) {
-        hint_button->setBright(false);
+        SetDisableButton(hint_button);
       }
       return;
     } else if (type == Widget::TouchEventType::CANCELED) {
@@ -300,13 +325,17 @@ void SinglePlay::CreateButton() {
     }
   });
   ui_node_->addChild(hint_button);
+  if (User::Instance().hint_count() <= 0) {
+    SetDisableButton(hint_button);
+  }
 
   auto stop_timer_button = Button::create("ui/StopTimerButton.png", "ui/StopTimerButton.png", "ui/StopTimerButton.png");
   stop_timer_button->setPosition(Vec2(center_.x + 600.0f, kBottomSpriteHeight / 2.0f));
   stop_timer_button->addTouchEventListener([&, stop_timer_button](Ref* sender, Widget::TouchEventType type) {
     if (type == Widget::TouchEventType::BEGAN) {
-      if (paused_)  return;
-      if (User::Instance().stop_timer_count() <= 0)  return;
+      if (paused_ || stopped_timer || User::Instance().stop_timer_count() <= 0) {
+        return;
+      }
       auto audio = SimpleAudioEngine::getInstance();
       audio->playEffect("sounds/ButtonClick.mp3");
       const auto scale_action = ScaleTo::create(0.1f, 1.1f);
@@ -314,14 +343,18 @@ void SinglePlay::CreateButton() {
     } else if (type == Widget::TouchEventType::ENDED) {
       const auto scale_action = ScaleTo::create(0.1f, 1.0f);
       stop_timer_button->runAction(scale_action);
-
       auto stop_timer_count = User::Instance().stop_timer_count();
-      --stop_timer_count;
+      stop_timer_count = std::max(0, --stop_timer_count);
       User::Instance().set_stop_timer_count(stop_timer_count);
-      if (stop_timer_count <= 0) {
-        stop_timer_button->setBright(false);
-      }
-
+      // 시간 10초간 멈추기
+      stopped_timer = true;
+      auto callback = CallFunc::create([&] {
+        SetEnableButton(stop_timer_button);
+        stopped_timer = false;
+      });
+      auto seq = Sequence::create(DelayTime::create(10.0f), callback, nullptr);
+      stop_timer_button->runAction(seq);
+      SetDisableButton(stop_timer_button);
       return;
     } else if (type == Widget::TouchEventType::CANCELED) {
       const auto scale_action = ScaleTo::create(0.1f, 1.0f);
@@ -329,6 +362,9 @@ void SinglePlay::CreateButton() {
     }
   });
   ui_node_->addChild(stop_timer_button);
+  if (User::Instance().stop_timer_count() <= 0) {
+    SetDisableButton(stop_timer_button);
+  }
 
   pause_button_ = Button::create("ui/PauseButton.png", "ui/PauseButton.png", "ui/PauseButton.png");
   pause_button_->setPosition(Vec2(1920.0f - 100.0f, kBottomSpriteHeight / 2.0f));
@@ -350,14 +386,13 @@ void SinglePlay::CreateButton() {
     }
   });
   ui_node_->addChild(pause_button_);
-  pause_button_->setBright(false);
-  pause_button_->setVisible(false);
 }
 
-//===========================================================================
-// 
-// 스테이지 및 크레딧 라벨 생성
-//
+/****************************************************************************
+* 
+* 스테이지 및 크레딧 라벨 생성
+*
+***/
 void SinglePlay::CreateLabel(int current_stage_count, int total_stage_count) {
   stage_label_ = Label::createWithTTF(ccsf2("STAGE  %d / %d", current_stage_count, total_stage_count), NormalFont, 30);
   stage_label_->setPosition(

@@ -80,6 +80,7 @@ private:
 
   Button* pause_button_ = nullptr;
   bool paused_ = true;
+  bool stopped_timer = false;
 
   std::vector<HiddenPoint> hidden_points_;
   std::vector<Rect> left_hidden_rects_;
